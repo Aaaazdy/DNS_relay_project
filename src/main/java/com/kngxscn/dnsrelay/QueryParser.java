@@ -2,6 +2,8 @@ package com.kngxscn.dnsrelay;
 
 import java.io.IOException;
 import java.net.*;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 
 // 实现Java runnable接口, 以满足多线程需求
@@ -9,12 +11,16 @@ public class QueryParser implements Runnable
 {
     private byte[] packetData;
     private int packetLength;
+    private int mode;
+    private String DNSIP;
     private InetAddress clientAddress;
     private int clientPort;
 
-    QueryParser(DatagramPacket packet)
+    QueryParser(DatagramPacket packet, String DNSIP, int mode)
     {
         packetLength = packet.getLength();
+        this.DNSIP = DNSIP;
+        this.mode = mode;
         packetData = new byte[packetLength];
         System.arraycopy(packet.getData(), 0, packetData, 0, packet.getLength());
         // 保存packet中的数据
@@ -39,6 +45,15 @@ public class QueryParser implements Runnable
         DNSHeader dnsHeader = new DNSHeader();
         DNSQuestion dnsQuestion = new DNSQuestion();
         // 处理请求，返回结果
+        if (mode == 1)
+        {
+            System.out.println("-------------------------------------------------------------------------");
+            System.out.println("RECEIVED from" + " 127.0.0.1:" + clientPort + " (" + packetLength + "Bytes) " + "[ID:" + packetData[0] + packetData[1] + "]");
+            System.out.println(Utils.byteArrayToHexString(packetData));
+            System.out.println("ID:" + dnsHeader.getTransID() + " " + "QR:" + (((((int) (dnsHeader.getFlags())) << 16) >>> 31)) + " " + "opcode:" + (((((int) (dnsHeader.getFlags())) << 17) >>> 28)) +
+                    " " + "AA:" + ((((int) (dnsHeader.getFlags()) << 21) >>> 31)) + " " + "TC:" + ((((int) (dnsHeader.getFlags()) << 22) >>> 31)) + " " + "RD:" + ((((int) (dnsHeader.getFlags()) << 23) >>> 31) +
+                    " " + "RA:" + (((((int) (dnsHeader.getFlags())) << 24) >>> 31)) + " " + "RCODE:" + ((((int) (dnsHeader.getFlags())) << 28) >> 28)));
+        }
         try
         {
             // 读取DNS header
@@ -85,49 +100,8 @@ public class QueryParser implements Runnable
                     dnsHeader.setHeader(index, Utils.byteArrayToShort(bytes));
                     index++;
                 }
+
             }
-
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setTransID(Utils.byteArrayToShort(buffer));
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setFlags(Utils.byteArrayToShort(buffer));
-//
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setQdcount(Utils.byteArrayToShort(buffer));
-//
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setAncount(Utils.byteArrayToShort(buffer));
-//
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setNscount(Utils.byteArrayToShort(buffer));
-//
-//            for (int i = 0; i < 2; i++)
-//            {
-//                buffer[i] = packetData[i + offset];
-//            }
-//            offset += 2;
-//            dnsHeader.setArcount(Utils.byteArrayToShort(buffer));
-
 
             /**
              DNS header 后为 Queries
@@ -148,32 +122,27 @@ public class QueryParser implements Runnable
                 }
                 i += 2;
                 dnsQuestion.setQueryType(Utils.byteArrayToShort(bytes));
-//                dnsHeader.setHeader(index, Utils.byteArrayToShort(bytes));
-//                index++;
                 for (int j = 0; j < 2; j++)
                 {
                     bytes[j] = packetData[j + i];
                 }
                 i += 2;
                 dnsQuestion.setQueryClass(Utils.byteArrayToShort(bytes));
-//                dnsHeader.setHeader(index, Utils.byteArrayToShort(bytes));
-//                index++;
             } else
             {
                 System.out.println(Thread.currentThread().getName() + " DNS数据长度不匹配, Packet length fault");
             }
         } catch (ArrayIndexOutOfBoundsException e)
         {
-            System.out.println(Thread.currentThread().getName() + "Packet length fault");
+            System.out.println(Thread.currentThread().getName() + " Packet length fault");
         }
-
 
 // 查询本地域名-IP映射
 //--------------------------------------------------------------------
 
 
         String ip = DNSRelayServer.getMap().getOrDefault(dnsQuestion.getQueryName(), "");
-        System.out.println(Thread.currentThread().getName() + " DNS_relay 相应请求 :domain:" + dnsQuestion.getQueryName() + " Qtype:" + dnsQuestion.getQueryType() + " ip:" + ip);
+        System.out.println(Thread.currentThread().getName() + " " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + " Client 127.0.0.1 " + "info:" + dnsQuestion.getQueryName() + "  TYPE:" + dnsQuestion.getQueryType() + "  CLASS:" + dnsQuestion.getQueryClass());
 
         if ((!ip.equals("")) && dnsQuestion.getQueryType() == 1)
         { // 在本地域名-IP映射文件中找到结果且查询类型为A(Host Address)，构造回答的数据包
@@ -224,7 +193,9 @@ public class QueryParser implements Runnable
 //            {
 //                response_data[responseOffset++] = authorityBytes[i];
 //            }
-            System.out.println(Thread.currentThread().getName() + " DNS回复帧内容:0x" + Utils.byteArrayToHexString(answerBytes));
+
+            if (mode == 1)
+                System.out.println(Thread.currentThread().getName() + " " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + " Client 127.0.0.1 " + " DNS回复帧内容:0x" + Utils.byteArrayToHexString(answerBytes));
             // 回复响应数据包
             DatagramPacket responsePacket = new DatagramPacket(response_data, response_data.length, clientAddress, clientPort);
             synchronized (DNSRelayServer.Obj)
@@ -232,7 +203,34 @@ public class QueryParser implements Runnable
             {
                 try
                 {
-                    System.out.println(Thread.currentThread().getName() + "获得socket，响应DNS请求:" + dnsQuestion.getQueryName() + "  DNS查询结果:" + ip);
+                    if (mode == 1)
+                    {
+                        packetLength = responsePacket.getLength();
+                        packetData = new byte[packetLength];
+                        System.arraycopy(responsePacket.getData(), 0, packetData, 0, responsePacket.getLength());
+                        // 保存packet中的数据
+                        clientAddress = responsePacket.getAddress();
+                        // 返回机器的ip地址
+                        clientPort = responsePacket.getPort();
+                        // 返回机器端口
+                        int i = 0;
+                        while (i < 12)
+                        {
+                            if (i % 2 == 0)
+                            {
+                                dnsHeader.setHeader(i / 2, Utils.byteArrayToShort(packetData, i));
+
+                            }
+
+                            i++;
+                        }
+                        System.out.println("SEND to" + " 127.0.0.1:" + clientPort + " (" + responsePacket.getLength() + "Bytes) " + "[ID:" + dnsHeaderResponse.getTransID() + "]");
+                        System.out.println(Utils.byteArrayToHexString(packetData));
+                        System.out.println("ID:" + dnsHeader.getTransID() + " " + "QR:" + (((((int) (dnsHeader.getFlags())) << 16) >>> 31)) + " " + "opcode:" + (((((int) (dnsHeader.getFlags())) << 17) >>> 28)) +
+                                " " + "AA:" + ((((int) (dnsHeader.getFlags()) << 21) >>> 31)) + " " + "TC:" + ((((int) (dnsHeader.getFlags()) << 22) >>> 31)) + " " + "RD:" + ((((int) (dnsHeader.getFlags()) << 23) >>> 31) +
+                                " " + "RA:" + (((((int) (dnsHeader.getFlags())) << 24) >>> 31)) + " " + "RCODE:" + ((((int) (dnsHeader.getFlags())) << 28) >> 28)));
+                    }
+                    System.out.println(Thread.currentThread().getName() + " " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + " Client 127.0.0.1 " + "获得socket，响应DNS请求:" + dnsQuestion.getQueryName() + "  DNS查询结果:" + ip);
                     DNSRelayServer.getSocket().send(responsePacket);
                 } catch (IOException e)
                 {
@@ -241,17 +239,22 @@ public class QueryParser implements Runnable
             }
         } else
         { // 本地未检索到，请求因特网DNS服务器
-            System.out.println(Thread.currentThread().getName() + "DNS_relay中未存储此域名信息-→forward query");
+            System.out.println(Thread.currentThread().getName() + " " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + " Client 127.0.0.1 " + "Domain not found locally-→forward query");
+
             try
             {
-                InetAddress dnsServerAddress = InetAddress.getByName("114.114.114.114");
+                InetAddress dnsServerAddress = InetAddress.getByName(DNSIP);
                 DatagramPacket internetSendPacket = new DatagramPacket(packetData, packetLength, dnsServerAddress, 53);
                 DatagramSocket internetSocket = new DatagramSocket();
                 internetSocket.send(internetSendPacket);
                 byte[] receivedData = new byte[1024];
                 DatagramPacket internetReceivedPacket = new DatagramPacket(receivedData, receivedData.length);
                 internetSocket.receive(internetReceivedPacket);
-
+                if (mode == 1)
+                {
+                    System.out.println("SEND to " + DNSIP + ":53" + " (" + packetLength + "Bytes) " + "[ID:" + dnsHeader.getTransID() + "]");
+                    System.out.println(Utils.byteArrayToHexString(packetData));
+                }
                 // 回复响应数据包
                 DatagramPacket responsePacket = new DatagramPacket(receivedData, internetReceivedPacket.getLength(), clientAddress, clientPort);
                 internetSocket.close();
@@ -260,8 +263,39 @@ public class QueryParser implements Runnable
                 {
                     try
                     {
-                        System.out.println(Thread.currentThread().getName() + "获得socket，响应DNS请求:" + dnsQuestion.getQueryName());
+                        if (mode == 1)
+                        {
+                            packetLength = responsePacket.getLength();
+                            packetData = new byte[packetLength];
+                            System.arraycopy(responsePacket.getData(), 0, packetData, 0, responsePacket.getLength());
+                            // 保存packet中的数据
+                            clientAddress = responsePacket.getAddress();
+                            // 返回机器的ip地址
+                            clientPort = responsePacket.getPort();
+                            // 返回机器端口
+                            int i = 0;
+                            while (i < 12)
+                            {
+                                if (i % 2 == 0)
+                                {
+                                    dnsHeader.setHeader(i / 2, Utils.byteArrayToShort(packetData, i));
+
+                                }
+
+                                i++;
+                            }
+                            System.out.println("RECEIVED from " + DNSIP + ":" + clientPort + " (" + responsePacket.getLength() + "Bytes) " + "[ID:" + receivedData[0] + receivedData[1] + "]");
+                            System.out.println(Utils.byteArrayToHexString(packetData));
+                            System.out.println("ID:" + dnsHeader.getTransID() + " " + "QR:" + (((((int) (dnsHeader.getFlags())) << 16) >>> 31)) + " " + "opcode:" + (((((int) (dnsHeader.getFlags())) << 17) >>> 28)) +
+                                    " " + "AA:" + ((((int) (dnsHeader.getFlags()) << 21) >>> 31)) + " " + "TC:" + ((((int) (dnsHeader.getFlags()) << 22) >>> 31)) + " " + "RD:" + ((((int) (dnsHeader.getFlags()) << 23) >>> 31) +
+                                    " " + "RA:" + (((((int) (dnsHeader.getFlags())) << 24) >>> 31)) + " " + "RCODE:" + ((((int) (dnsHeader.getFlags())) << 28) >> 28)));
+                        }
+                        System.out.println(Thread.currentThread().getName() + " " + new SimpleDateFormat("yyyy-MM-dd hh:mm:ss").format(new Date()) + " Client 127.0.0.1 " + "获得socket，响应DNS请求:" + dnsQuestion.getQueryName());
                         DNSRelayServer.getSocket().send(responsePacket);
+                        if (mode == 1)
+                        {
+                            System.out.println("SEND to" + " 127.0.0.1:" + responsePacket.getPort() + " (" + responsePacket.getLength() + "Bytes) " + "[ID:" + receivedData[0] + receivedData[1] + "]");
+                        }
                     } catch (IOException e)
                     {
                         e.printStackTrace();
