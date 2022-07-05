@@ -3,79 +3,71 @@ package com.kngxscn.dnsrelay;
 public class DNSRR {
 	/**
 	 * Answer/Authority/Additional
-	   0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |					   ... 						  |
-	  |                    NAME                       |
-	  |                    ...                        |
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |                    TYPE                       |
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |                    CLASS                      |
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |                    TTL                        |
-      |                                               |
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |                    RDLENGTH                   |
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
-	  |                    ...                        |
-	  |                    RDATA                      |
-	  |                    ...                        | 
-	  +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 0  1  2  3  4  5  6  7  0  1  2  3  4  5  6  7
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |					   ... 						  |
+	 |                    NAME                       |
+	 |                    ...                        |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |                    TYPE                       |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |                    CLASS                      |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |                    TTL                        |
+	 |                                               |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |                    RDLENGTH                   |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
+	 |                    ...                        |
+	 |                    RDATA                      |
+	 |                    ...                        |
+	 +--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+--+
 	 */
 	
-	/* NAME (2字节 采用消息压缩) */
-	private short aname;
-	
-	/* TYPE（2字节） */
-	private short atype;
-	
-	/* CLASS（2字节） */
-	private short aclass;
-	
-	/* TTL（4字节） */
+	/*NAME (2 bytes using message compression),TYPE (2 bytes), CLASS (2 bytes), TTL (4 bytes), LENGTH (2 bytes),
+	RDATA IPv4 is 4 bytes*/
+	private short name;
+	private short type;
+	private short class1;
 	private int ttl;
-	
-	/* RDLENGTH（2字节） */
-	private short rdlength;
-	
-	/* RDATA IPv4为4字节*/
-	private String rdata;
+	private short length;
+	private String rd;
+	private byte[] result;
+	private int offset = 0;
+	byte[] b2 = new byte[2];
+	byte[] b4 = new byte[4];
 
 	public DNSRR() {}
 
-	public DNSRR(short aname, short atype, short aclass, int ttl, short rdlength, String rdata) {
-		this.aname = aname;
-		this.atype = atype;
-		this.aclass = aclass;
+	public DNSRR(short name, short type, short class1, int ttl, short length, String rd) {
+		this.name = name;
+		this.type = type;
+		this.class1 = class1;
 		this.ttl = ttl;
-		this.rdlength = rdlength;
-		this.rdata = rdata;
+		this.length = length;
+		this.rd = rd;
+		this.result = new byte[12 + length];
 	}
 
 	public short getAname() {
-		return aname;
+		return name;
 	}
-
-	public void setAname(short aname) {
-		this.aname = aname;
+	//set and get information from this class
+	public void setAname(short name) {
+		this.name = name;
 	}
 
 	public short getAtype() {
-		return atype;
+		return type;
 	}
 
-	public void setAtype(short atype) {
-		this.atype = atype;
+	public void setAtype(short type) {
+		this.type = type;
 	}
 
-	public short getAclass() {
-		return aclass;
-	}
+	public short getAclass() {return class1;}
 
-	public void setAclass(short aclass) {
-		this.aclass = aclass;
-	}
+	public void setAclass(short class1) {this.class1 = class1;}
 
 	public int getTtl() {
 		return ttl;
@@ -86,55 +78,88 @@ public class DNSRR {
 	}
 
 	public short getRdlength() {
-		return rdlength;
+		return length;
 	}
 
-	public void setRdlength(short rdlength) {
-		this.rdlength = rdlength;
+	public void setRdlength(short length) {
+		this.length = length;
 	}
-	
+
 	public String getRdata() {
-		return rdata;
+		return rd;
 	}
 
-	public void setRdata(String rdata) {
-		this.rdata = rdata;
+	public void setRdata(String rd) {
+		this.rd = rd;
 	}
 
-    /**
-     * 输出包含DNS RR所有信息的字节数组
-     */
-    public byte[] toByteArray() {
-        byte[] data = new byte[12 + rdlength];
-        int offset = 0;
-        byte[] byte_2 = new byte[2];
-        byte[] byte_4 = new byte[4];
-        byte_2 = Utils.shortToByteArray(aname);
+	//load the information
+	public byte[] toByteArray() {
+		//byte[] result = new byte[12 + length];
+		//int offset = 0;
+
+		//store information in result and return
+		store1(name);
+		store1(type);
+		store1(class1);
+		store2(ttl);
+		store1(length);
+		if (length == 4) {
+			store3(rd);
+		}
+
+		//store information into result
+	/*	for (int i=0; i<2; i++) {
+			result[offset++] = Utils.shortToByteArray(name)[i];
+		}
+
         for (int i=0; i<2; i++) {
-            data[offset++] = byte_2[i];
+            result[offset++] = Utils.shortToByteArray(type)[i];
         }
-        byte_2 = Utils.shortToByteArray(atype);
+
         for (int i=0; i<2; i++) {
-            data[offset++] = byte_2[i];
+            result[offset++] = Utils.shortToByteArray(class1)[i];
         }
-        byte_2 = Utils.shortToByteArray(aclass);
-        for (int i=0; i<2; i++) {
-            data[offset++] = byte_2[i];
-        }
-        byte_4 = Utils.intToByteArray(ttl);
+
         for (int i=0; i<4; i++) {
-            data[offset++] = byte_4[i];
+            result[offset++] = Utils.intToByteArray(ttl)[i];
         }
-        byte_2 = Utils.shortToByteArray(rdlength);
+
         for (int i=0; i<2; i++) {
-            data[offset++] = byte_2[i];
+            result[offset++] = Utils.shortToByteArray(length)[i];
         }
-        if (rdlength == 4) {
-            byte_4 = Utils.ipv4ToByteArray(rdata);
+
+        if (length == 4) {
             for (int i=0; i<4; i++) {
-                data[offset++] = byte_4[i];
+                result[offset++] = Utils.ipv4ToByteArray(rd)[i];
             }
-        }
-        return data;
-    }
+        }*/
+
+		return result;
+
+	}
+	// method of store short format
+	private void store1(short a){
+		b2 = Utils.shortToByteArray(a);
+		for (int i=0; i<2; i++) {
+			result[offset++] = b2[i];
+		}
+	}
+
+	// method of store int format
+	private void store2(int a){
+		b4 = Utils.intToByteArray(a);
+		for (int i=0; i<4; i++) {
+			result[offset++] = b4[i];
+		}
+	}
+
+	//method of store string format
+	private void store3(String a){
+		b4=Utils.ipv4ToByteArray(a);
+		for (int i=0; i<4; i++) {
+			result[offset++] = b4[i];
+		}
+	}
+
 }

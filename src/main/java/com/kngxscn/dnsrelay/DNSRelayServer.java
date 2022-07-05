@@ -14,62 +14,72 @@ import java.util.concurrent.Executors;
 
 
 public class DNSRelayServer {
-    private static Map<String, String> domainIpMap;
-    private static DatagramSocket socket;
-    static final Object lock = new Object();
-
-    static Map<String, String> getDomainIpMap() {
-        return domainIpMap;
-    }
-
-    static DatagramSocket getSocket() {
-        return socket;
-    }
-
-    private static Map<String, String> generateDomainIpMap(String filePath) {
-        // 读取本地域名-IP映射文件的内容
-        File localTableFile = new File(filePath);
-        Map<String, String> domainIpMap = new HashMap<String, String>();
+    static final Object Obj = new Object();
+    // ---------------------------read domainIp, and store them-------------------------------------------------------//
+    private static Map<String, String> getDomainIP(String path) {
+        File file = new File(path);
+        Map<String, String> dAI = new HashMap<String, String>();
         try {
-            BufferedReader br = new BufferedReader(new FileReader(localTableFile));
+            BufferedReader br = new BufferedReader(new FileReader(file));
             String line = null;
             while ((line = br.readLine()) != null) {
-                String[] contentList = line.split(" ");
-                if (contentList.length < 2) {
+                String[] word = line.split(" ");
+                if (word.length < 2) {
                     continue;
                 }
-                domainIpMap.put(contentList[1], contentList[0]);
+                dAI.put(word[1], word[0]);
             }
             br.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return domainIpMap;
+        return dAI;
+    }
+    //-----------------------------------------the method of get socket,map and packet---------------------------------//
+    private static DatagramSocket socket;
+    private static Map<String, String> ourMap;
+
+
+    static DatagramSocket getSocket() {
+        return socket;
     }
 
-    public static void main(String[] args ) {
-        if (args.length < 1) {
-            System.out.println("请输入本地域名-IP映射文件的路径");
-        }
-        domainIpMap = generateDomainIpMap("dnsrelay.txt");
-        System.out.println("本地域名-IP映射文件读取完成。一共" + domainIpMap.size() + "条记录");
+    static DatagramSocket createSocket(int port) throws SocketException {
+        DatagramSocket socket1=new DatagramSocket(port);
+        return socket1;
+    }
 
+    static Map<String, String> getMap() {
+        return ourMap;
+    }
+
+    static DatagramPacket createPacket(byte[] num){
+        return new DatagramPacket(num, num.length);
+    }
+    //----------------------------------------------run the code------------------------------------------------------//
+    public static void main(String[] args ) {
+        //get the domain ip
+        ourMap = getDomainIP("dnsrelay.txt");
+        System.out.println("The local domain-IP mapping file is read successfully.In total " + ourMap.size() + " records.");
+        //create packet and socket
+        byte[] num = new byte[1024];
+        DatagramPacket packet = createPacket(num);
         try {
-            socket = new DatagramSocket(53);
+            socket = createSocket(53);
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        byte[] data = new byte[1024];
-        DatagramPacket packet = new DatagramPacket(data, data.length);
-
-        ExecutorService servicePool = Executors.newFixedThreadPool(10);  // 容纳10个线程的线程池
+        //Create a thread pool of 10 capacity
+        ExecutorService Pool = Executors.newFixedThreadPool(10);
+        //receive packet and execute them
         while (true) {
             try {
                 socket.receive(packet);
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            servicePool.execute(new QueryParser(packet));
+            Pool.execute(new QueryParser(packet));
         }
     }
 }
+

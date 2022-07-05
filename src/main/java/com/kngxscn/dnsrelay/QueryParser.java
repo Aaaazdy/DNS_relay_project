@@ -172,7 +172,7 @@ public class QueryParser implements Runnable
 //--------------------------------------------------------------------
 
 
-        String ip = DNSRelayServer.getDomainIpMap().getOrDefault(dnsQuestion.getQueryName(), "");
+        String ip = DNSRelayServer.getMap().getOrDefault(dnsQuestion.getQueryName(), "");
         System.out.println(Thread.currentThread().getName() + " DNS_relay 相应请求 :domain:" + dnsQuestion.getQueryName() + " Qtype:" + dnsQuestion.getQueryType() + " ip:" + ip);
 
         if ((!ip.equals("")) && dnsQuestion.getQueryType() == 1)
@@ -227,7 +227,7 @@ public class QueryParser implements Runnable
             System.out.println(Thread.currentThread().getName() + " DNS回复帧内容:0x" + Utils.byteArrayToHexString(answerBytes));
             // 回复响应数据包
             DatagramPacket responsePacket = new DatagramPacket(response_data, response_data.length, clientAddress, clientPort);
-            synchronized (DNSRelayServer.lock)
+            synchronized (DNSRelayServer.Obj)
             // 使用synchronized关键字实现代码块的进程同步
             {
                 try
@@ -255,7 +255,7 @@ public class QueryParser implements Runnable
                 // 回复响应数据包
                 DatagramPacket responsePacket = new DatagramPacket(receivedData, internetReceivedPacket.getLength(), clientAddress, clientPort);
                 internetSocket.close();
-                synchronized (DNSRelayServer.lock)
+                synchronized (DNSRelayServer.Obj)
                 // 使用synchronized关键字实现代码块的进程同步
                 {
                     try
