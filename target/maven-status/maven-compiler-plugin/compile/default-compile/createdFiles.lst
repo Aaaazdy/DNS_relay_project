@@ -1,0 +1,6 @@
+com\dnsrelay\DNSQuestion.class
+com\dnsrelay\QueryParser.class
+com\dnsrelay\DNSHeader.class
+com\dnsrelay\DNSRR.class
+com\dnsrelay\DNSRelayServer.class
+com\dnsrelay\Utils.class

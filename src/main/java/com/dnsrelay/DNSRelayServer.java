@@ -1,9 +1,11 @@
-package com.kngxscn.dnsrelay;
+package com.dnsrelay;
 
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
@@ -88,8 +90,9 @@ public class DNSRelayServer {
         long size = file.length();
         String dnsIp=c;
         int mode=0;
-
-        System.out.println("Delayrelay ,"+System.currentTimeMillis());
+        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+        Date date = new Date(System.currentTimeMillis());
+        System.out.println("Delayrelay ,"+formatter.format(date));
         System.out.println("Usage: dnsrelay [-d|-dd] [<dns-server>][<db-file>]");
         System.out.println("");
         System.out.println("Name server "+"[-d|-dd] [<dns-server>][<db-file>]");
@@ -120,7 +123,7 @@ public class DNSRelayServer {
             e.printStackTrace();
         }
         //Create a thread pool of 10 capacity
-        ExecutorService Pool = Executors.newFixedThreadPool(1);
+        ExecutorService Pool = Executors.newFixedThreadPool(10);
         //receive packet and execute them
         while (true) {
             try {

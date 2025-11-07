@@ -1,4 +1,4 @@
-package com.kngxscn.dnsrelay;
+package com.dnsrelay;
 
 import java.io.IOException;
 import java.net.*;
@@ -6,7 +6,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.concurrent.ArrayBlockingQueue;
 
-// 实现Java runnable接口, 以满足多线程需求
+// implement Java runnable interface to meet multithreading requirements
 public class QueryParser implements Runnable
 {
     private byte[] packetData;

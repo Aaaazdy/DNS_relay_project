@@ -1,0 +1,5 @@
+# Created at 2025-11-07T01:34:29.900
+Boot Manifest-JAR contains absolute paths in classpath 'D:\workspace_IDEA\dnsrelay-master\target\test-classes'
+Hint: <argLine>-Djdk.net.URLClassPath.disableClassPathURLCheck=true</argLine>
+'other' has different root
+

@@ -1,4 +1,4 @@
-package com.kngxscn.dnsrelay;
+package com.dnsrelay;
 
 public class Utils
 {
@@ -96,9 +96,6 @@ public class Utils
             if (s.length() < 2)
             {
                 sb.append('0');
-            }else if (s.equals("0"))
-            {
-                return sb.toString();
             }
             sb.append(s);
         }

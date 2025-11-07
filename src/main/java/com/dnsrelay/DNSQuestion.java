@@ -1,4 +1,4 @@
-package com.kngxscn.dnsrelay;
+package com.dnsrelay;
 
 public class DNSQuestion{
 	private String queryName;

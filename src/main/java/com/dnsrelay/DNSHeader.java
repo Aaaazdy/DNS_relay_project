@@ -1,4 +1,4 @@
-package com.kngxscn.dnsrelay;
+package com.dnsrelay;
 
 public class DNSHeader{
     private short transID;
@@ -88,7 +88,6 @@ public class DNSHeader{
             setARcount(config);
         }
     }
-
     public byte[] toByteArray(){
         byte[] datagram = new byte[12];
         byte[] new2Byte = new byte[2];

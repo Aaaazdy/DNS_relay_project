@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report-3.0.xsd" version="3.0" name="com.dnsrelay.DNSRelayServerTest" time="0.021" tests="1" errors="0" skipped="0" failures="0">
+  <properties>
+    <property name="java.specification.version" value="21"/>
+    <property name="sun.cpu.isalist" value="amd64"/>
+    <property name="sun.jnu.encoding" value="UTF-8"/>
+    <property name="java.class.path" value="D:\workspace_IDEA\dnsrelay-master\target\test-classes;D:\workspace_IDEA\dnsrelay-master\target\classes;C:\Users\Aaaazdy\.m2\repository\junit\junit\3.8.1\junit-3.8.1.jar;"/>
+    <property name="java.vm.vendor" value="Oracle Corporation"/>
+    <property name="sun.arch.data.model" value="64"/>
+    <property name="user.variant" value=""/>
+    <property name="java.vendor.url" value="https://java.oracle.com/"/>
+    <property name="user.timezone" value="Europe/Berlin"/>
+    <property name="os.name" value="Windows 10"/>
+    <property name="java.vm.specification.version" value="21"/>
+    <property name="sun.java.launcher" value="SUN_STANDARD"/>
+    <property name="user.country" value="CN"/>
+    <property name="sun.boot.library.path" value="D:\ProgramFiles\Java\jdk-21\bin"/>
+    <property name="sun.java.command" value="C:\Users\Aaaazdy\AppData\Local\Temp\surefire11817022016462558274\surefirebooter-20251107013429847_3.jar C:\Users\Aaaazdy\AppData\Local\Temp\surefire11817022016462558274 2025-11-07T01-34-29_707-jvmRun1 surefire-20251107013429847_1tmp surefire_0-20251107013429847_2tmp"/>
+    <property name="jdk.debug" value="release"/>
+    <property name="surefire.test.class.path" value="D:\workspace_IDEA\dnsrelay-master\target\test-classes;D:\workspace_IDEA\dnsrelay-master\target\classes;C:\Users\Aaaazdy\.m2\repository\junit\junit\3.8.1\junit-3.8.1.jar;"/>
+    <property name="sun.cpu.endian" value="little"/>
+    <property name="user.home" value="C:\Users\Aaaazdy"/>
+    <property name="user.language" value="zh"/>
+    <property name="java.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.version.date" value="2024-04-16"/>
+    <property name="java.home" value="D:\ProgramFiles\Java\jdk-21"/>
+    <property name="file.separator" value="\"/>
+    <property name="basedir" value="D:\workspace_IDEA\dnsrelay-master"/>
+    <property name="java.vm.compressedOopsMode" value="Zero based"/>
+    <property name="line.separator" value="&#10;"/>
+    <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
+    <property name="java.specification.name" value="Java Platform API Specification"/>
+    <property name="surefire.real.class.path" value="C:\Users\Aaaazdy\AppData\Local\Temp\surefire11817022016462558274\surefirebooter-20251107013429847_3.jar"/>
+    <property name="user.script" value=""/>
+    <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
+    <property name="java.runtime.version" value="21.0.3+7-LTS-152"/>
+    <property name="user.name" value="Aaaazdy"/>
+    <property name="stdout.encoding" value="UTF-8"/>
+    <property name="path.separator" value=";"/>
+    <property name="os.version" value="10.0"/>
+    <property name="java.runtime.name" value="Java(TM) SE Runtime Environment"/>
+    <property name="file.encoding" value="UTF-8"/>
+    <property name="java.vm.name" value="Java HotSpot(TM) 64-Bit Server VM"/>
+    <property name="localRepository" value="C:\Users\Aaaazdy\.m2\repository"/>
+    <property name="java.vendor.url.bug" value="https://bugreport.java.com/bugreport/"/>
+    <property name="java.io.tmpdir" value="C:\Users\Aaaazdy\AppData\Local\Temp\"/>
+    <property name="java.version" value="21.0.3"/>
+    <property name="user.dir" value="D:\workspace_IDEA\dnsrelay-master"/>
+    <property name="os.arch" value="amd64"/>
+    <property name="java.vm.specification.name" value="Java Virtual Machine Specification"/>
+    <property name="sun.os.patch.level" value=""/>
+    <property name="native.encoding" value="UTF-8"/>
+    <property name="java.library.path" value="D:\ProgramFiles\Java\jdk-21\bin;C:\WINDOWS\Sun\Java\bin;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS;C:\WINDOWS\system32;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;D:\ProgramFiles\Anaconda;D:\ProgramFiles\Java\jdk-21\bin;C:\Program Files\Volta\;D:\ProgramFiles\CUDA\v12.5\bin;D:\ProgramFiles\CUDA\v12.5\include;D:\ProgramFiles\CUDA\v12.5\lib;D:\ProgramFiles\CUDA\v12.5\libnvvp;C:\Program Files\NVIDIA Corporation\Nsight Compute 2024.2.1\;C:\Program Files\Common Files\Oracle\Java\javapath;D:\Program Files\Haskell\bin;C:\Program Files\dotnet\;C:\Program Files (x86)\NVIDIA Corporation\PhysX\Common;D:\ProgramFiles\Anaconda\Library\mingw-w64\bin;D:\ProgramFiles\Anaconda\Library\usr\bin;D:\ProgramFiles\Anaconda\Library\bin;D:\ProgramFiles\Anaconda\Scripts;D:\texlive\2023\bin\windows;C:\Program Files\NVIDIA Corporation\NVIDIA app\NvDLISR;D:\ProgramFiles\nodejs\;E:\code\Huggingface;C:\ProgramData\chocolatey\bin;D:\Program Files\Git\cmd;D:\Program Files\Android;E:\Program Files\Tesseract-OCR;C:\Program Files\Docker\Docker\resources\bin;D:\ProgramFiles\Maven\apache-maven-3.9.11\bin;C:\Users\Aaaazdy\AppData\Local\Volta\bin;C:\Users\Aaaazdy\AppData\Local\Microsoft\WindowsApps;C:\Users\Aaaazdy\.dotnet\tools;D:\Program Files\Microsoft VS Code\bin;D:\DevelopmentTools\IntelliJ_IDEA2024\bin;D:\DevelopmentTools\PyCharm\bin;C:\Users\Aaaazdy\AppData\Roaming\npm;E:\ProgramFiles\Ollama;c:\Users\Aaaazdy\.vscode\extensions\vscjava.vscode-java-debug-0.58.3\bundled\scripts\noConfigScripts;c:\Users\Aaaazdy\AppData\Roaming\Code\User\globalStorage\github.copilot-chat\debugCommand;."/>
+    <property name="java.vm.info" value="mixed mode, sharing"/>
+    <property name="stderr.encoding" value="UTF-8"/>
+    <property name="java.vendor" value="Oracle Corporation"/>
+    <property name="java.vm.version" value="21.0.3+7-LTS-152"/>
+    <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
+    <property name="java.class.version" value="65.0"/>
+  </properties>
+  <testcase name="testApp" classname="com.dnsrelay.DNSRelayServerTest" time="0.003"/>
+</testsuite>
