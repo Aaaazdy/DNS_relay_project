@@ -62,50 +62,78 @@ public class DNSRelayServer {
     }
     static public void error(){
         System.out.println("your format is wrong!");
-        System.out.println("you should input like this: dnsrelay [-d|-dd] [<dns-server>][<db-file>]");
+        System.out.println("you should input like this: dnsrelay [-d|-dd] [<dns-server>] [<db-file>]");
         System.exit(0);
     }
     //----------------------------------------------run the code------------------------------------------------------//
     public static void main(String[] args ) throws IOException {
-        //get the domain ip
-        System.out.println("please input the direct of txt file");
-        Scanner sc= new Scanner(System.in);
-        String a=sc.next();
-        if(!a.equals("dnsrelay")){
-            error();
-        }
-        String b=sc.next();
-        if (!(b.equals("-d") || b.equals("-dd"))) {
-            error();
-        }
-        String c=sc.next();
-        String[] n=c.split("\\.");
-        if (n.length!=4){
-            error();
+        Scanner input = new Scanner(System.in);
+        String debugLevel;
+        String dnsIp;
+        String fileName;
+        String cmd;
+        System.out.println("Welcome to the DNS Relay Server!");
+        System.out.println("To use the server, please input following the format below:");
+        // System.out.println("please input: dnsrelay [-d|-dd] [<dns-server>] [<db-file>]");
+        while (true) {
+            System.out.println("please input: dnsrelay [-d|-dd] [<dns-server>] [<db-file>]");
+            cmd = input.nextLine().trim();
+
+            // \s represent whitespace character
+            String[] args2 = cmd.split("\\s+");
+
+            if (args2.length != 4) {
+                System.out.println("wrong argument count!");
+                continue;
+            }
+
+            // first of the args must be "dnsrelay"
+            if (!args2[0].equals("dnsrelay")) {
+                System.out.println("first arg must be dnsrelay!");
+                continue;
+            }
+
+            // check if the second parameter is -d or -dd
+            if (!args2[1].equals("-d") && !args2[1].equals("-dd")) {
+                System.out.println("arg2 must be -d or -dd!");
+                continue;
+            }
+
+            // check if the third parameter is a valid ip address
+            String[] ip = args2[2].split("\\.");
+            if (ip.length != 4) {
+                System.out.println("dns-server format error!");
+                continue;
+            }
+
+            debugLevel = args2[1];
+            dnsIp    = args2[2];
+            fileName = args2[3];
+            // if the arguments are in correct format → break
+            break;
         }
 
-        String d=sc.next();
-        ourMap = getDomainIP(d);
-        File file = new File(d);
+        ourMap = getDomainIP(fileName);
+        File file = new File(fileName);
         long size = file.length();
-        String dnsIp=c;
         int mode=0;
-        SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
-        Date date = new Date(System.currentTimeMillis());
-        System.out.println("Delayrelay ,"+formatter.format(date));
-        System.out.println("Usage: dnsrelay [-d|-dd] [<dns-server>][<db-file>]");
-        System.out.println("");
-        System.out.println("Name server "+"[-d|-dd] [<dns-server>][<db-file>]");
-        if (b.equals("-d")) {
+        // SimpleDateFormat formatter= new SimpleDateFormat("yyyy-MM-dd 'at' HH:mm:ss z");
+        // Date date = new Date(System.currentTimeMillis());
+        // System.out.println("Delayrelay ,"+formatter.format(date));
+        // System.out.println("Usage: dnsrelay [-d|-dd] [<dns-server>][<db-file>]");
+        // System.out.println("");
+        // System.out.println("Name server "+"[-d|-dd] [<dns-server>][<db-file>]");
+        if (debugLevel.equals("-d")) {
             System.out.println("Debug level " + 1);
         }
-        else if (b.equals("-dd")) {
+        else if (debugLevel.equals("-dd")) {
             System.out.println("Debug level " + 2);
             mode = 1;
         }
+        // told user the UDP port 53 will be binded
         System.out.println("Bind UDP port " + 53);
-        System.out.println("Try to load table " + d + " ...ok!");
-        if (b.equals("-dd")) {
+        System.out.println("Try to load table " + fileName + " ...ok!");
+        if (debugLevel.equals("-dd")) {
             BufferedReader br = new BufferedReader(new FileReader(file));
             String line = null;
             while ((line = br.readLine()) != null) {
